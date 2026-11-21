@@ -2,6 +2,17 @@
 <resources>
     <style name="Theme.RhoCoo" parent="android:Theme.Material.NoActionBar" />
 
+    <!-- See-through window for the notification's TV chooser; Compose draws the scrim and card. -->
+    <style name="Theme.RhoCoo.Floating" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
     <!-- One remote button in the notification layouts. -->
     <style name="NotifKey">
         <item name="android:layout_width">0dp</item>

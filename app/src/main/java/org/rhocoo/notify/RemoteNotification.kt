@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import org.rhocoo.R
 import org.rhocoo.roku.DeviceStore
 import org.rhocoo.roku.RokuKey
+import org.rhocoo.ui.DeviceDialogActivity
 import org.rhocoo.ui.MainActivity
 
 /** The mini remote that lives in the notification shade. */
@@ -84,12 +85,25 @@ object RemoteNotification {
             for ((id, key) in buttons) {
                 setOnClickPendingIntent(id, RemoteKeyReceiver.keyIntent(context, key))
             }
+            // Only the expanded layout has the gear.
+            if (layout == R.layout.notif_remote_expanded) {
+                setOnClickPendingIntent(R.id.key_settings, chooseDevice(context))
+            }
         }
 
     private fun openApp(context: Context): PendingIntent =
         PendingIntent.getActivity(
             context, 0,
             Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+    /** Opens the floating "Remote controls" dialog over whatever app is in front. */
+    private fun chooseDevice(context: Context): PendingIntent =
+        PendingIntent.getActivity(
+            context, 1,
+            Intent(context, DeviceDialogActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 

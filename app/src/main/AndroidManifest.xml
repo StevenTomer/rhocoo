@@ -31,6 +31,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Floating TV chooser opened from the notification. Its own empty task affinity keeps
+             the main RhoCoo screen from coming forward, so the user's app stays behind it. -->
+        <activity
+            android:name=".ui.DeviceDialogActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.RhoCoo.Floating"
+            android:windowSoftInputMode="adjustResize" />
+
         <receiver android:name=".notify.RemoteKeyReceiver" android:exported="false" />
 
         <receiver android:name=".notify.BootReceiver" android:exported="true">

@@ -47,6 +47,7 @@ object RokuController {
                     .firstOrNull { it.serial == device.serial && it.host != device.host }
                     ?: return@withContext SendFailure.Unreachable
                 store.updateHost(moved.serial, moved.host)
+                store.remember(listOf(moved))
                 try {
                     block(RokuClient(moved.host))
                     null

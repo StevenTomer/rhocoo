@@ -3,7 +3,7 @@
 An open-source Android remote for Roku TVs. Its main feature is a **mini remote in the notification shade**, so you can control the TV without leaving the app you're in.
 
 - **Collapsed notification:** Vol−, Vol+, Left, Play/Pause, Right
-- **Expanded notification:** adds Power, Mute, Instant replay, Back, Home, D-pad + OK, Rewind, and Fast forward
+- **Expanded notification:** adds Power, Mute, Instant replay, Back, Home, D-pad + OK, Rewind, and Fast forward, plus a gear that opens a small dialog over your current app to switch TVs
 - **In the app:** the full remote, plus typing into TV search boxes
 - **Quick Settings tile:** shows or hides the notification remote
 

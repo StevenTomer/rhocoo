@@ -79,14 +79,7 @@ fun DevicePickerScreen(
             HorizontalDivider()
             LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(vertical = 4.dp)) {
                 items(devices, key = { it.serial }) { device ->
-                    ListItem(
-                        headlineContent = { Text(device.name) },
-                        supportingContent = { Text("${device.model} · ${device.host.substringBefore(':')}") },
-                        leadingContent = {
-                            RadioButton(selected = device.serial == selectedSerial, onClick = { onChoose(device) })
-                        },
-                        modifier = Modifier.clickable { onChoose(device) },
-                    )
+                    DeviceRow(device, device.serial == selectedSerial, onChoose)
                 }
             }
             HorizontalDivider()
@@ -95,8 +88,19 @@ fun DevicePickerScreen(
     }
 }
 
+/** One Roku in a picker list; shared by the full-screen picker and the notification's dialog. */
 @Composable
-private fun ManualEntry(onManual: (String) -> Unit) {
+internal fun DeviceRow(device: RokuDevice, selected: Boolean, onChoose: (RokuDevice) -> Unit) {
+    ListItem(
+        headlineContent = { Text(device.name) },
+        supportingContent = { Text("${device.model} · ${device.host.substringBefore(':')}") },
+        leadingContent = { RadioButton(selected = selected, onClick = { onChoose(device) }) },
+        modifier = Modifier.clickable { onChoose(device) },
+    )
+}
+
+@Composable
+internal fun ManualEntry(onManual: (String) -> Unit) {
     var ip by rememberSaveable { mutableStateOf("") }
     Row(
         Modifier.fillMaxWidth().padding(16.dp),

@@ -31,11 +31,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var scanning by mutableStateOf(false)
         private set
-    var found by mutableStateOf<List<RokuDevice>>(emptyList())
+    var found by mutableStateOf(store.known)
         private set
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages
+
+    /** Emits each time the user picks a TV. */
+    private val _chosen = MutableSharedFlow<RokuDevice>(extraBufferCapacity = 1)
+    val chosen: SharedFlow<RokuDevice> = _chosen
 
     fun startPicking() {
         picking = true
@@ -51,10 +55,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         scanning = true
         viewModelScope.launch {
             val result = runCatching { RokuDiscovery.discover(getApplication()) }.getOrDefault(emptyList())
-            // Keep manually added devices that discovery didn't see.
+            // Fresh results first (they carry current IPs), then TVs seen before that didn't answer.
+            store.remember(result)
             found = (result + found).distinctBy { it.serial }.sortedBy { it.name.lowercase() }
             scanning = false
-            if (found.isEmpty()) _messages.tryEmit("No Rokus found. Check Wi-Fi, or enter the TV's IP address.")
+            if (result.isEmpty()) {
+                _messages.tryEmit(
+                    if (store.selected.value != null) "No other Rokus found on this Wi-Fi. You can enter an IP address."
+                    else "No Rokus found. Check Wi-Fi, or enter the TV's IP address.",
+                )
+            }
         }
     }
 
@@ -84,6 +94,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         store.select(device)
         picking = false
         RemoteNotification.sync(getApplication())
+        _chosen.tryEmit(device)
     }
 
     fun press(key: RokuKey) {
