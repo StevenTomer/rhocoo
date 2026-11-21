@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.RhoCoo" parent="android:Theme.Material.NoActionBar" />
+
+    <!-- One remote button in the notification layouts. -->
+    <style name="NotifKey">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:tint">@color/notif_icon</item>
+    </style>
+
+    <style name="NotifKey.Text">
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/notif_icon</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

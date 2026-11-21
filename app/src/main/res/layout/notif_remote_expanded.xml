@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expanded remote: extras on the left, D-pad on the right (right-handed). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:orientation="vertical">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <ImageButton android:id="@+id/key_power" style="@style/NotifKey" android:src="@drawable/ic_key_power" android:contentDescription="Power" />
+        <ImageButton android:id="@+id/key_mute" style="@style/NotifKey" android:src="@drawable/ic_key_mute" android:contentDescription="Mute" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" />
+        <ImageButton android:id="@+id/key_back" style="@style/NotifKey" android:src="@drawable/ic_key_back" android:contentDescription="Back" />
+        <ImageButton android:id="@+id/key_up" style="@style/NotifKey" android:src="@drawable/ic_key_up" android:contentDescription="Up" />
+        <ImageButton android:id="@+id/key_home" style="@style/NotifKey" android:src="@drawable/ic_key_home" android:contentDescription="Home" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <ImageButton android:id="@+id/key_volume_up" style="@style/NotifKey" android:src="@drawable/ic_key_vol_up" android:contentDescription="Volume up" />
+        <ImageButton android:id="@+id/key_replay" style="@style/NotifKey" android:src="@drawable/ic_key_replay" android:contentDescription="Instant replay" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" />
+        <ImageButton android:id="@+id/key_left" style="@style/NotifKey" android:src="@drawable/ic_key_left" android:contentDescription="Left" />
+        <TextView android:id="@+id/key_select" style="@style/NotifKey.Text" android:text="OK" android:contentDescription="OK" />
+        <ImageButton android:id="@+id/key_right" style="@style/NotifKey" android:src="@drawable/ic_key_right" android:contentDescription="Right" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <ImageButton android:id="@+id/key_volume_down" style="@style/NotifKey" android:src="@drawable/ic_key_vol_down" android:contentDescription="Volume down" />
+        <ImageButton android:id="@+id/key_play" style="@style/NotifKey" android:src="@drawable/ic_key_play" android:contentDescription="Play/Pause" />
+        <FrameLayout android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" />
+        <ImageButton android:id="@+id/key_rev" style="@style/NotifKey" android:src="@drawable/ic_key_rev" android:contentDescription="Rewind" />
+        <ImageButton android:id="@+id/key_down" style="@style/NotifKey" android:src="@drawable/ic_key_down" android:contentDescription="Down" />
+        <ImageButton android:id="@+id/key_fwd" style="@style/NotifKey" android:src="@drawable/ic_key_fwd" android:contentDescription="Fast forward" />
+    </LinearLayout>
+</LinearLayout>

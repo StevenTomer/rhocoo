@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Collapsed mini remote: Vol-, Vol+, Left, Play, Right (navigation under the right thumb). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+        <ImageButton android:id="@+id/key_volume_down" style="@style/NotifKey" android:src="@drawable/ic_key_vol_down" android:contentDescription="Volume down" />
+        <ImageButton android:id="@+id/key_volume_up" style="@style/NotifKey" android:src="@drawable/ic_key_vol_up" android:contentDescription="Volume up" />
+        <ImageButton android:id="@+id/key_left" style="@style/NotifKey" android:src="@drawable/ic_key_left" android:contentDescription="Left" />
+        <ImageButton android:id="@+id/key_play" style="@style/NotifKey" android:src="@drawable/ic_key_play" android:contentDescription="Play/Pause" />
+        <ImageButton android:id="@+id/key_right" style="@style/NotifKey" android:src="@drawable/ic_key_right" android:contentDescription="Right" />
+</LinearLayout>

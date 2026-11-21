@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RhoCoo</string>
+    <string name="channel_remote">Remote control</string>
+    <string name="channel_remote_desc">The mini remote in the notification shade</string>
+    <string name="tile_label">RhoCoo remote</string>
+    <string name="ecp_disabled_hint">The TV refused control. On the Roku: Settings → System → Advanced system settings → Control by mobile apps → Network access: Default.</string>
+    <string name="unreachable">Can\'t reach %1$s. Is it on the same Wi-Fi?</string>
+    <string name="no_device">No Roku selected. Open RhoCoo to pick one.</string>
+</resources>
