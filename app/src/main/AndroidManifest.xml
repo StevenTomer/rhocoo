@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- The remote is held by a foreground service so it stays at the top of the shade. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:label="@string/app_name"
@@ -43,6 +46,15 @@
             android:windowSoftInputMode="adjustResize" />
 
         <receiver android:name=".notify.RemoteKeyReceiver" android:exported="false" />
+
+        <service
+            android:name=".notify.RemoteService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps a TV remote control in the notification shade, so the user can control their TV from any app." />
+        </service>
 
         <receiver android:name=".notify.BootReceiver" android:exported="true">
             <intent-filter>

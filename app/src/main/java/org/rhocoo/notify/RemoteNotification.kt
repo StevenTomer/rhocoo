@@ -1,6 +1,7 @@
 package org.rhocoo.notify
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.service.quicksettings.TileService
 import android.widget.RemoteViews
@@ -23,8 +25,9 @@ import org.rhocoo.ui.MainActivity
 /** The mini remote that lives in the notification shade. */
 object RemoteNotification {
 
-    private const val CHANNEL_ID = "remote"
-    private const val NOTIFICATION_ID = 1
+    private const val OLD_CHANNEL_ID = "remote"
+    private const val CHANNEL_ID = "remote_top"
+    const val NOTIFICATION_ID = 1
 
     /** View ids in the notification layouts, and the key each one sends. */
     private val buttons = mapOf(
@@ -50,37 +53,70 @@ object RemoteNotification {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
 
-    /** Posts (or refreshes) the remote if it is enabled and a Roku is selected; otherwise removes it. */
+    /**
+     * Shows (or refreshes) the remote if it is enabled and a Roku is selected; otherwise removes it.
+     *
+     * To keep the remote at the top of the shade, it is held by [RemoteService], a foreground
+     * service that does no work: Android puts colorized foreground-service notifications in its
+     * own section above conversations and everyday notifications (the slot navigation apps use).
+     * Android only allows starting that service at certain moments (app on screen, boot, a tap on
+     * the notification...); when it refuses, the remote is posted as a plain notification instead.
+     */
     fun sync(context: Context) {
-        val store = DeviceStore.get(context)
-        val device = store.selected.value
-        if (!store.notificationEnabled.value || device == null || !canPost(context)) {
-            NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
-        } else {
+        if (shouldShow(context)) {
             ensureChannel(context)
-            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stat_rhocoo)
-                .setColor(ContextCompat.getColor(context, R.color.brand_purple))
-                .setSubText(device.name)
-                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(remoteViews(context, R.layout.notif_remote_collapsed))
-                .setCustomBigContentView(remoteViews(context, R.layout.notif_remote_expanded))
-                .setContentIntent(openApp(context))
-                .setDeleteIntent(RemoteKeyReceiver.dismissedIntent(context))
-                .setOngoing(true)
-                .setSilent(true)
-                .setOnlyAlertOnce(true)
-                .setShowWhen(false)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .build()
-            @Suppress("MissingPermission") // checked by canPost()
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+            val inForeground = try {
+                ContextCompat.startForegroundService(context, Intent(context, RemoteService::class.java))
+                true
+            } catch (_: IllegalStateException) {
+                false // ForegroundServiceStartNotAllowedException (Android 12+) or background start limits
+            } catch (_: SecurityException) {
+                false
+            }
+            if (!inForeground) {
+                @Suppress("MissingPermission") // shouldShow() checked canPost()
+                NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, build(context, colorized = false)!!)
+            }
+        } else {
+            context.stopService(Intent(context, RemoteService::class.java))
+            NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
         }
         TileService.requestListeningState(context, ComponentName(context, RemoteTileService::class.java))
     }
 
-    private fun remoteViews(context: Context, layout: Int) =
+    fun shouldShow(context: Context): Boolean {
+        val store = DeviceStore.get(context)
+        return store.notificationEnabled.value && store.selected.value != null && canPost(context)
+    }
+
+    /**
+     * The remote notification, or null if no Roku is selected. [colorized] fills the card with the
+     * brand purple (only honoured for foreground services) and switches the icons to white.
+     */
+    fun build(context: Context, colorized: Boolean): Notification? {
+        val device = DeviceStore.get(context).selected.value ?: return null
+        ensureChannel(context)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_rhocoo)
+            .setColor(ContextCompat.getColor(context, R.color.brand_purple))
+            .setColorized(colorized)
+            .setSubText(device.name)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(remoteViews(context, R.layout.notif_remote_collapsed, colorized))
+            .setCustomBigContentView(remoteViews(context, R.layout.notif_remote_expanded, colorized))
+            .setContentIntent(openApp(context))
+            .setDeleteIntent(RemoteKeyReceiver.dismissedIntent(context))
+            .setOngoing(true)
+            .setSilent(true)
+            .setOnlyAlertOnce(true)
+            .setShowWhen(false)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
+    }
+
+    private fun remoteViews(context: Context, layout: Int, colorized: Boolean) =
         RemoteViews(context.packageName, layout).apply {
             for ((id, key) in buttons) {
                 setOnClickPendingIntent(id, RemoteKeyReceiver.keyIntent(context, key))
@@ -88,6 +124,13 @@ object RemoteNotification {
             // Only the expanded layout has the gear.
             if (layout == R.layout.notif_remote_expanded) {
                 setOnClickPendingIntent(R.id.key_settings, chooseDevice(context))
+            }
+            if (colorized) {
+                // White on the purple card. (Views missing from this layout are skipped by RemoteViews.)
+                for (id in buttons.keys + R.id.key_settings) {
+                    if (id == R.id.key_select) setTextColor(id, Color.WHITE)
+                    else setInt(id, "setColorFilter", Color.WHITE)
+                }
             }
         }
 
@@ -109,11 +152,14 @@ object RemoteNotification {
 
     private fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
+        // 0.1/0.2 used a default-importance channel; an app can't raise a channel's importance
+        // later, so that one is replaced.
+        manager.deleteNotificationChannel(OLD_CHANNEL_ID)
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return
-        // Default importance keeps the remote in the main section of the shade, not under
-        // "Silent"; sound and vibration are off so it never makes noise.
+        // High importance ranks the remote above everyday notifications. It stays silent: no
+        // sound, no vibration, and setSilent() keeps it from popping up over other apps.
         val channel = NotificationChannel(
-            CHANNEL_ID, context.getString(R.string.channel_remote), NotificationManager.IMPORTANCE_DEFAULT,
+            CHANNEL_ID, context.getString(R.string.channel_remote), NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = context.getString(R.string.channel_remote_desc)
             setSound(null, null)
